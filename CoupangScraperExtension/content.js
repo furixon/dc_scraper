@@ -122,15 +122,28 @@ function downloadJSON(data, filename) {
     }, 0);
 }
 
-// 실행 로직
-// 페이지가 완전히 로드된 후 약간의 딜레이를 두고 실행 (동적 렌더링 대비)
-setTimeout(() => {
+// 실행 로직: 폴링(Polling) 방식으로 데이터 로드 대기
+let attempts = 0;
+const maxAttempts = 15; // 최대 15초 대기
+
+const intervalId = setInterval(() => {
+    attempts++;
+    console.log(`[Coupang Scraper] 데이터 추출 시도 ${attempts}/${maxAttempts}...`);
+    
     const data = scrapeProduct();
-    if (data && data.title !== "N/A") {
+    
+    // 성공 조건: 제목이 N/A가 아니고, 가격 정보(판매가 또는 정가)가 존재할 때
+    const isValidData = data && data.title !== "N/A" && (data.final_price !== 0 || data.original_price !== 0);
+
+    if (isValidData) {
+        clearInterval(intervalId);
         const filename = `coupang_${data.product_code}.json`;
         downloadJSON(data, filename);
         console.log(`[Coupang Scraper] ${filename} 다운로드 완료`);
     } else {
-        console.log("[Coupang Scraper] 유효한 상품 정보를 찾지 못했습니다.");
+        if (attempts >= maxAttempts) {
+            clearInterval(intervalId);
+            console.log("[Coupang Scraper] 최대 시도 횟수 초과. 유효한 상품 정보를 찾지 못했습니다.");
+        }
     }
-}, 2000); // 2초 대기
+}, 1000); // 1초 간격으로 확인

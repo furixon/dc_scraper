@@ -33,7 +33,7 @@ def setup_driver() -> uc.Chrome:
     # Initialize driver. 
     # Note: explicit driver_executable_path is removed to let uc find it automatically on macOS/Linux.
     # Fix: Explicitly set version_main to 142 to match the installed Chrome version and avoid version mismatch errors.
-    driver = uc.Chrome(options=options, enable_cdp_events=True, incognito=True, version_main=142)
+    driver = uc.Chrome(options=options, enable_cdp_events=True, incognito=True, version_main=143)
     return driver
 
 def get_product_code(url: str) -> str:
